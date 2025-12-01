@@ -313,23 +313,38 @@
   }
 
   /* -------------- GIF Overlay -------------- */
-  #gif-showcase-overlay {
+  /* FULLSCREEN CINEMATIC GIF */
+#gif-showcase-overlay {
     position: fixed;
-    top:0; left:0;
-    width:100vw;
-    height:100vh;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     background: black;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:10000;
-    overflow:hidden;
-  }
-  #gif-showcase-image {
-    height:100vh;
-    width:auto;
-    object-fit:cover;
-  }
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    overflow: hidden;
+}
+
+/* Desktop: normal */
+#gif-showcase-image {
+    max-height: 100vh;
+    max-width: 100vw;
+    object-fit: contain;
+}
+
+/* MOBILE: rotate GIF to landscape fullscreen */
+@media (max-width: 768px) {
+    #gif-showcase-image {
+        transform: rotate(90deg);
+        width: 100vh;   /* use full height as rotated width */
+        height: 100vw;  /* use full width as rotated height */
+        object-fit: cover;
+    }
+}
+
 
   .hidden{ display:none !important }
   </style>
@@ -1041,4 +1056,5 @@ boot();
 </script>
 </body>
 </html>
+
 
