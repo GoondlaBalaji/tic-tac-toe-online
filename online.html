@@ -401,6 +401,92 @@
 
 
   .hidden{ display:none !important }
+    /* MOBILE UI FIXES */
+@media (max-width: 768px) {
+
+  #panel {
+    max-width: 92%;
+    padding: 18px;
+    margin: 12px;
+    box-shadow: 12px 12px 0 var(--shadow-ink);
+    transform: skewX(-2deg);
+  }
+
+  #panel > * {
+    transform: skewX(2deg);
+  }
+
+  #title {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+  }
+
+  .controls {
+    margin-top: 10px;
+    gap: 6px;
+    flex-direction: column;
+  }
+
+  .btn {
+    font-size: 1rem;
+    padding: 10px 12px;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  #status {
+    font-size: 1rem;
+    padding: 8px;
+    min-height: 36px;
+  }
+
+  #board {
+    gap: 4px;
+    border-radius: 4px;
+  }
+
+  .cell {
+    font-size: 2.6rem;
+    border: 2px solid var(--color-ink);
+  }
+
+  /* MODE PAGE BUTTON FIXES */
+  .mode-btn {
+    width: 90%;
+    max-width: 330px;
+    font-size: 1.6rem;
+    padding: 14px 20px;
+    margin: 14px auto;
+  }
+
+  .mode-title {
+    font-size: 2.6rem;
+    margin-bottom: 20px;
+  }
+}
+
+/* SMALLER PHONES FIXES */
+@media (max-width: 480px) {
+
+  #title {
+    font-size: 1.9rem;
+  }
+
+  .mode-btn {
+    font-size: 1.4rem;
+    padding: 12px 18px;
+  }
+
+  .cell {
+    font-size: 2.2rem;
+  }
+
+  #panel {
+    padding: 14px;
+    box-shadow: 10px 10px 0 var(--shadow-ink);
+  }
+}
+
   </style>
 </head>
 
@@ -1110,6 +1196,7 @@ boot();
 </script>
 </body>
 </html>
+
 
 
 
