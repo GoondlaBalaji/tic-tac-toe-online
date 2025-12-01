@@ -469,6 +469,17 @@
 
 
   .hidden{ display:none !important }
+    @media (max-width: 900px) {
+  body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* smooth iOS pull-to-refresh */
+    overscroll-behavior: auto; 
+  }
+
+  html {
+    overscroll-behavior-y: auto;
+  }
+}
 
   </style>
 </head>
@@ -1180,6 +1191,7 @@ boot();
 </script>
 </body>
 </html>
+
 
 
 
