@@ -1010,15 +1010,22 @@ if (!data.result) {
   gameActive = true;
   currentResult = "";
 
-  if (data.turn === player) {
-    const color = (player === "X") ? "var(--accent-x)" : "var(--accent-o)";
+  const actualTurn = data.turn;   // REAL turn from Firebase
+
+  if (actualTurn === player) {
+    const color = (player === "X")
+      ? "var(--accent-x)" 
+      : "var(--accent-o)";
     setStatus("Your turn (" + player + ")", color);
   } else {
     const opp = (player === "X") ? "O" : "X";
-    const oppColor = (opp === "X") ? "var(--accent-x)" : "var(--accent-o)";
+    const oppColor = (opp === "X")
+      ? "var(--accent-x)"
+      : "var(--accent-o)";
     setStatus("Opponent's turn (" + opp + ")", oppColor);
   }
 }
+
 
 
   });
@@ -1233,6 +1240,7 @@ boot();
 </script>
 </body>
 </html>
+
 
 
 
