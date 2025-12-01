@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe Battle Arena</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Permanent+Marker&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --ink: #000000;
+            --paper: #f7f3e8;
+            --accent-red: #ff3c00;
+            --accent-blue: #0066ff;
+            --accent-green: #32cd32;
+        }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            font-family: 'Permanent Marker', cursive;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+
+            background-image:
+                radial-gradient(var(--ink) 0.5px, transparent 0.5px),
+                radial-gradient(var(--ink) 0.5px, var(--paper) 0.5px);
+            background-size: 12px 12px;
+            background-position: 0 0, 6px 6px;
+
+            overflow: hidden;
+        }
+
+        /* PANEL */
+        #menu-box {
+            background: var(--paper);
+            border: 8px solid var(--ink);
+            box-shadow: 15px 15px 0 var(--ink);
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+            transform: skewX(-5deg);
+            text-align: center;
+        }
+
+        #menu-box > * {
+            transform: skewX(5deg);
+        }
+
+        /* TITLE */
+        #title {
+            font-family: 'Bangers', cursive;
+            font-size: 3.5em;
+            color: var(--accent-red);
+            text-shadow: 4px 4px 0 var(--ink);
+            margin-bottom: 10px;
+        }
+
+        /* MAIN BUTTONS */
+        .menu-btn {
+            font-family: 'Bangers', cursive;
+            font-size: 2em;
+            background: var(--accent-green);
+            border: 5px solid var(--ink);
+            color: var(--paper);
+            padding: 15px 20px;
+            width: 100%;
+            margin: 15px 0;
+            cursor: pointer;
+            box-shadow: 6px 6px 0 var(--ink);
+            transition: 0.1s;
+        }
+
+        .menu-btn:hover {
+            transform: translate(3px, 3px);
+            box-shadow: 3px 3px 0 var(--ink);
+        }
+
+        /* ROOM OPTIONS */
+        #room-options {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .option-title {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: var(--accent-blue);
+        }
+
+        .room-btn {
+            background: var(--accent-blue);
+        }
+
+        #room-code-input {
+            width: 90%;
+            padding: 10px;
+            border: 4px solid var(--ink);
+            font-size: 1.5em;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        #generated-code {
+            background: yellow;
+            border: 4px solid var(--ink);
+            font-size: 1.6em;
+            padding: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div id="menu-box">
+
+        <div id="title">BATTLE ARENA</div>
+
+        <button class="menu-btn" onclick="goOffline()">OFFLINE MODE</button>
+
+        <button class="menu-btn" onclick="goAI()">AI MODE</button>
+
+        <button class="menu-btn" onclick="toggleRoom()">ROOM MATCH</button>
+
+        <div id="room-options">
+            <div class="option-title">ROOM MATCH</div>
+
+            <button class="menu-btn room-btn" onclick="createRoom()">CREATE ROOM</button>
+
+            <input type="text" id="room-code-input" placeholder="Enter Room Code">
+
+            <button class="menu-btn room-btn" onclick="joinRoom()">JOIN ROOM</button>
+
+            <div id="generated-code"></div>
+        </div>
+    </div>
+
+    <!-- FIREBASE + LOGIC -->
+    <script type="module">
+
+        /* FIREBASE IMPORTS */
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOipyswkPf2Tcdd_j46GnypfsAREixjmE",
+            authDomain: "tic-tac-toe-952af.firebaseapp.com",
+            databaseURL: "https://tic-tac-toe-952af-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "tic-tac-toe-952af",
+            storageBucket: "tic-tac-toe-952af.appspot.com",
+            messagingSenderId: "336489066886",
+            appId: "1:336489066886:web:737bb1f0e2b7ead0017c07"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        /* PAGE REDIRECTS */
+        window.goOffline = function () {
+            window.location.href = "game.html?mode=offline";
+        };
+
+        window.goAI = function () {
+            window.location.href = "ai.html?mode=ai";
+        };
+
+        window.toggleRoom = function () {
+            const box = document.getElementById("room-options");
+            box.style.display = box.style.display === "block" ? "none" : "block";
+        };
+
+        /* CREATE ROOM */
+        window.createRoom = async function () {
+
+            const code = Math.random().toString(36).substring(2, 7).toUpperCase();
+
+            const codeBox = document.getElementById("generated-code");
+            codeBox.style.display = "block";
+            codeBox.innerHTML = `ROOM CODE: <b>${code}</b>`;
+
+            const roomRef = ref(db, "rooms/" + code);
+
+            await set(roomRef, {
+                board: ["","","","","","","","",""],
+                turn: "X",
+                result: "",
+                hostPresent: true,
+                guestPresent: false,
+                updatedAt: Date.now()
+            });
+
+            alert("Room created! Waiting for guest…");
+
+            onValue(roomRef, snap => {
+                const data = snap.val();
+                if (data && data.guestPresent) {
+                    window.location.href = `online.html?mode=room_host&code=${code}`;
+                }
+            });
+
+        };
+
+        /* JOIN ROOM */
+        window.joinRoom = function () {
+            const code = document.getElementById("room-code-input").value.trim().toUpperCase();
+
+            if (!code) {
+                alert("Enter a room code!");
+                return;
+            }
+
+            window.location.href = `online.html?mode=room_join&code=${code}`;
+        };
+
+    </script>
+
+</body>
+</html>

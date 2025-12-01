@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Tic-Tac-Toe — AI Arena (Cartoon)</title>
+
+    <!-- fonts (kept for stylistic continuity) -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bangers&family=Permanent+Marker&family=Kalam:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        /* ===========================
+     Cartoon / playful UI styles
+     =========================== */
+
+        :root {
+            --bg: #fffbe6;
+            --ink: #121212;
+            --accent-x: #ff6b35;
+            --accent-o: #00a3ff;
+            --win: #2fd66b;
+            --panel: #fff0d9;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Kalam', cursive;
+            background: linear-gradient(180deg, #fffbe6 0%, #fff6d1 50%);
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Main panel (keeps your game's panel look) */
+        #game-wrap {
+            width: 95%;
+            max-width: 560px;
+            padding: 28px;
+            background: var(--panel);
+            border: 8px solid var(--ink);
+            box-shadow: 18px 18px 0 rgba(0, 0, 0, .75);
+            transform: skewX(-4deg);
+            position: relative;
+        }
+
+        #game-wrap>* {
+            transform: skewX(4deg);
+        }
+
+        h1#title {
+            font-family: 'Bangers', cursive;
+            font-size: clamp(2rem, 6vw, 3.6rem);
+            margin: 0 0 8px 0;
+            color: var(--accent-x);
+            text-shadow: 4px 4px 0 var(--ink);
+            text-align: center;
+        }
+
+        #status {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1.35rem;
+            text-align: center;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.75);
+            border: 3px dashed var(--ink);
+            margin-bottom: 12px;
+            min-height: 48px;
+        }
+
+        /* board */
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            background: var(--ink);
+            width: 100%;
+            aspect-ratio: 1/1;
+            position: relative;
+        }
+
+        .cell {
+            background: var(--panel);
+            border: 4px solid var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Permanent Marker', cursive;
+            font-size: clamp(2.8rem, 10vw, 4.8rem);
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+
+        .cell:hover {
+            background: #fff;
+        }
+
+        .piece {
+            line-height: 1;
+            opacity: 0;
+            transform: scale(.6) rotate(20deg);
+            transition: all .28s cubic-bezier(.2, .9, .2, 1);
+        }
+
+        .x-played .piece,
+        .o-played .piece {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+        }
+
+        /* explosion particles */
+        .explosion {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: explode .55s forwards;
+        }
+
+        @keyframes explode {
+            from {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1)
+            }
+
+            to {
+                opacity: 0;
+                transform: translate(var(--dx), var(--dy)) scale(0)
+            }
+        }
+
+        /* winning cells */
+        .cell.winning-cell {
+            background: var(--win) !important;
+            border-color: var(--win) !important;
+            animation: pulse .6s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from {
+                box-shadow: 0 0 8px var(--win)
+            }
+
+            to {
+                box-shadow: 0 0 18px var(--win)
+            }
+        }
+
+        /* overlay (game over) */
+        #game-over-overlay {
+            position: absolute;
+            inset: 0;
+            display: none;
+            background: rgba(10, 10, 10, 0.9);
+            align-items: center;
+            justify-content: center;
+            z-index: 40;
+            flex-direction: column;
+        }
+
+        .game-over-message {
+            font-family: 'Bangers', cursive;
+            font-size: clamp(2.6rem, 7vw, 4rem);
+            background: var(--panel);
+            border: 8px double var(--ink);
+            padding: 18px;
+            box-shadow: 8px 8px 0 var(--ink);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        #gif-button-container {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .comic-button {
+            background: linear-gradient(180deg, #ffd28a, #ffc55a);
+            border: 6px solid var(--ink);
+            padding: 10px 18px;
+            font-family: 'Bangers', cursive;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 6px 6px 0 var(--ink);
+            color: var(--ink);
+        }
+
+        .comic-button.alt {
+            background: linear-gradient(180deg, #9be7ff, #58c4ff);
+        }
+
+        /* difficulty chooser modal (cartoon) */
+        #mode-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.25));
+        }
+
+        #mode-card {
+            width: 92%;
+            max-width: 720px;
+            padding: 26px;
+            background: #fff3d9;
+            border: 10px solid var(--ink);
+            box-shadow: 20px 20px 0 rgba(0, 0, 0, .8);
+            transform: skewX(-4deg);
+        }
+
+        #mode-card>* {
+            transform: skewX(4deg);
+        }
+
+        .mode-title {
+            font-family: 'Bangers', cursive;
+            font-size: 2.6rem;
+            margin: 0 0 6px 0;
+            color: var(--accent-o);
+            text-shadow: 3px 3px 0 var(--ink);
+            text-align: center;
+        }
+
+        .mode-sub {
+            text-align: center;
+            font-family: 'Permanent Marker', cursive;
+            margin-bottom: 12px;
+        }
+
+        /* 2×2 GRID layout */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            justify-items: center;
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .mode-tile {
+            width: 200px;
+            height: 140px;
+            background: linear-gradient(180deg, #fff6e0, #ffd9a8);
+            border: 6px solid var(--ink);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            flex-direction: column;
+            cursor: pointer;
+            box-shadow: 10px 10px 0 rgba(0, 0, 0, .6);
+        }
+
+        .mode-tile strong {
+            font-size: 1.35rem;
+            text-align: center;
+        }
+
+        .mode-tile span {
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .mode-tile.selected {
+            outline: 6px dashed var(--accent-o);
+            transform: translateY(-6px);
+        }
+
+        #sound-effect-display {
+            position: fixed;
+            left: 50%;
+            top: 18%;
+            transform: translateX(-50%) scale(.6);
+            pointer-events: none;
+            font-family: 'Bangers', cursive;
+            font-size: 3.6rem;
+            color: var(--accent-x);
+            text-shadow: 4px 4px 0 var(--ink);
+            opacity: 0;
+            transition: .35s;
+            z-index: 90;
+        }
+
+        #sound-effect-display.show {
+            opacity: 1;
+            transform: translateX(-50%) scale(1) rotate(4deg);
+        }
+
+        #gif-showcase-overlay {
+            position: fixed;
+            inset: 0;
+            background: black;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        #gif-showcase-image {
+            height: 100vh;
+            max-width: 100vw;
+            width: auto;
+            object-fit: contain;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            background: black;
+        }
+
+        @media (max-width:480px) {
+            .mode-tile {
+                width: 130px;
+                height: 100px
+            }
+
+            #sound-effect-display {
+                font-size: 2.6rem;
+                top: 14%
+            }
+        }
+        
+    </style>
+</head>
+
+<body>
+
+    <!-- MODE SELECT MODAL (cartoon style) -->
+    <div id="mode-screen" aria-hidden="false">
+        <div id="mode-card" role="dialog" aria-modal="true">
+            <div class="mode-title">AI ARENA</div>
+            <div class="mode-sub">Choose difficulty — pick your challenge!</div>
+
+            <div style="display:flex;justify-content:center;gap:12px;align-items:center;flex-wrap:wrap">
+                <div class="mode-grid">
+                    <div class="mode-tile" data-diff="easy" id="tile-easy">
+                        <strong style="font-size:1.25rem">EASY</strong>
+                        <span>Random moves — chill</span>
+                    </div>
+
+                    <div class="mode-tile" data-diff="medium" id="tile-medium">
+                        <strong style="font-size:1.25rem">MEDIUM</strong>
+                        <span>Tricky, sometimes optimal</span>
+                    </div>
+
+                    <div class="mode-tile" data-diff="hard" id="tile-hard">
+                        <strong style="font-size:1.25rem">HARD</strong>
+                        <span>Often optimal, few surprises</span>
+                    </div>
+
+                    <div class="mode-tile" data-diff="impossible" id="tile-impossible">
+                        <strong style="font-size:1.25rem">IMPOSSIBLE</strong>
+                        <span>Minimax — perfect play</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex;justify-content:center;margin-top:16px;gap:10px">
+                <button id="btn-start" class="comic-button">ENTER THE ARENA</button>
+                <button id="btn-guest" class="comic-button alt">RANDOM DIFFICULTY</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game panel -->
+    <div id="game-wrap">
+        <h1 id="title">TIC-TAC-TOE!</h1>
+        <div id="status">Player X's Turn!</div>
+
+        <div id="board" aria-hidden="false">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+
+        <div style="display:flex;justify-content:center;margin-top:18px">
+            <button id="reset-button" class="comic-button">NEW ARC!</button>
+        </div>
+
+        <div id="game-over-overlay">
+            <div class="game-over-message" id="overlay-message">DRAW!</div>
+            <div id="gif-button-container"></div>
+        </div>
+    </div>
+
+    <div id="sound-effect-display"></div>
+
+    <div id="gif-showcase-overlay" role="dialog" aria-hidden="true">
+        <img id="gif-showcase-image" alt="Attack animation">
+    </div>
+
+    <script>
+        const fightScenes = [
+                { name: "CRITICAL HOOK", file: "../animation/ani3.gif" },
+                { name: "WHIP ATTACK", file: "../animation/ani2.gif" },
+                { name: "DUELING STRINGS", file: "../animation/ani5.gif" },
+                { name: "SAMURAI CHARGE", file: "../animation/ani7.gif" },
+                { name: "AXE PARRY", file: "../animation/ani6.gif" },
+                { name: "RISING UPPERCUT", file: "../animation/ani1.gif" },
+                { name: "SPEED PUNCH", file: "../animation/ani4.gif" },
+            ];
+
+        const xSynth = new Tone.Synth({
+            oscillator: { type: "sine" },
+            envelope: { attack: 0.005, decay: 0.1, sustain: 0.1, release: 0.3 }
+        }).toDestination();
+
+        const oSynth = new Tone.AMSynth({
+            harmonicity: 2, oscillator: { type: "sawtooth" },
+            envelope: { attack: 0.05, decay: 0.2, sustain: 0.3, release: 0.5 }, modulation: { type: "square" }
+        }).toDestination();
+
+        const winSynth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "triangle" },
+            envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 3.0 }
+        }).toDestination();
+
+        const drawNoise = new Tone.NoiseSynth({
+            noise: { type: "pink" },
+            envelope: { attack: 0.005, decay: 0.5, sustain: 0, release: 0.01 }
+        }).toDestination();
+        drawNoise.volume.value = -10;
+
+        const modeScreen = document.getElementById('mode-screen');
+        const tileEasy = document.getElementById('tile-easy');
+        const tileMed = document.getElementById('tile-medium');
+        const tileHard = document.getElementById('tile-hard');
+        const tileImp = document.getElementById('tile-impossible');
+        const btnStart = document.getElementById('btn-start');
+        const btnGuest = document.getElementById('btn-guest');
+
+        const board = document.getElementById('board');
+        const cells = document.querySelectorAll('.cell');
+        const statusDisplay = document.getElementById('status');
+        const resetButton = document.getElementById('reset-button');
+
+        const overlay = document.getElementById('game-over-overlay');
+        const overlayMessage = document.getElementById('overlay-message');
+        const gifButtonContainer = document.getElementById('gif-button-container');
+
+        const soundDisplay = document.getElementById('sound-effect-display');
+        const gifShowcaseOverlay = document.getElementById('gif-showcase-overlay');
+        const gifShowcaseImage = document.getElementById('gif-showcase-image');
+
+        let aiDifficulty = 'easy';
+        let aiPlaysAs = 'O';
+        let humanPlaysAs = 'X';
+        let currentPlayer = 'X';
+        let gameActive = false;
+        let gameState = Array(9).fill('');
+
+        let audioEnabled = false;
+
+        /* ✅ Added for OPTION A (Turn Lock) */
+        let humanCanPlay = true;
+
+        function enableAudioOnFirstGesture() {
+            if (!audioEnabled) {
+                Tone.start().then(() => { audioEnabled = true; console.log("Audio enabled"); })
+                    .catch(() => { console.warn("Tone.start blocked") });
+            }
+        }
+        document.body.addEventListener('pointerdown', enableAudioOnFirstGesture, { once: true });
+        resetButton.addEventListener('pointerdown', enableAudioOnFirstGesture, { once: true });
+
+        function showSoundEffect(text, color = 'var(--accent-x)') {
+            soundDisplay.textContent = text;
+            soundDisplay.style.color = color;
+            soundDisplay.classList.add('show');
+            setTimeout(() => soundDisplay.classList.remove('show'), 700);
+        }
+
+        function createExplosion(cellEl, player) {
+            const color = player === 'X'
+                ? getComputedStyle(document.documentElement).getPropertyValue('--accent-x') || '#ff6b35'
+                : getComputedStyle(document.documentElement).getPropertyValue('--accent-o') || '#00a3ff';
+
+            const num = 10;
+            for (let i = 0; i < num; i++) {
+                const p = document.createElement('div');
+                p.className = 'explosion';
+                p.style.color = (player === 'X' ? '#ff6b35' : '#00a3ff');
+                const ang = Math.random() * Math.PI * 2;
+                const dist = 40 + Math.random() * 100;
+                const dx = Math.cos(ang) * dist + 'px';
+                const dy = Math.sin(ang) * dist + 'px';
+                p.style.setProperty('--dx', dx);
+                p.style.setProperty('--dy', dy);
+                p.style.left = '50%';
+                p.style.top = '50%';
+                cellEl.appendChild(p);
+                setTimeout(() => p.remove(), 650);
+            }
+        }
+
+        function evaluate(state) {
+            const wins = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            for (const [a, b, c] of wins) {
+                if (state[a] && state[a] === state[b] && state[b] === state[c]) {
+                    if (state[a] === aiPlaysAs) return +10;
+                    if (state[a] === humanPlaysAs) return -10;
+                }
+            }
+            return 0;
+        }
+
+        function checkTerminal(state) {
+            const score = evaluate(state);
+            if (score !== 0) return { terminal: true, score };
+            if (!state.includes('')) return { terminal: true, score: 0 };
+            return { terminal: false };
+        }
+
+        function minimax(state, depth, isMax) {
+            const term = checkTerminal(state);
+            if (term.terminal)
+                return term.score - depth * (term.score > 0 ? 1 : (term.score < 0 ? -1 : 0));
+
+            if (isMax) {
+                let best = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (state[i] === '') {
+                        state[i] = aiPlaysAs;
+                        const val = minimax(state, depth + 1, false);
+                        state[i] = '';
+                        best = Math.max(best, val);
+                    }
+                }
+                return best;
+            } else {
+                let best = +Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (state[i] === '') {
+                        state[i] = humanPlaysAs;
+                        const val = minimax(state, depth + 1, true);
+                        state[i] = '';
+                        best = Math.min(best, val);
+                    }
+                }
+                return best;
+            }
+        }
+
+        function chooseMinimaxMove(state) {
+            let bestVal = -Infinity;
+            let move = -1;
+            for (let i = 0; i < 9; i++) {
+                if (state[i] === '') {
+                    state[i] = aiPlaysAs;
+                    const moveVal = minimax(state, 0, false);
+                    state[i] = '';
+                    if (moveVal > bestVal) {
+                        bestVal = moveVal;
+                        move = i;
+                    }
+                }
+            }
+            return move;
+        }
+
+        function chooseAIMove(state) {
+            if (aiDifficulty === 'easy') {
+                const empties = state.map((v, i) => v === '' ? i : null).filter(v => v !== null);
+                return empties[Math.floor(Math.random() * empties.length)];
+            }
+
+            if (aiDifficulty === 'medium') {
+                if (Math.random() < 0.5) {
+                    const empties = state.map((v, i) => v === '' ? i : null).filter(v => v !== null);
+                    return empties[Math.floor(Math.random() * empties.length)];
+                } else {
+                    return chooseMinimaxMove(state);
+                }
+            }
+
+            if (aiDifficulty === 'hard') {
+                if (Math.random() < 0.15) {
+                    const empties = state.map((v, i) => v === '' ? i : null).filter(v => v !== null);
+                    return empties[Math.floor(Math.random() * empties.length)];
+                } else {
+                    let bestVal = -Infinity;
+                    const bestMoves = [];
+                    for (let i = 0; i < 9; i++) {
+                        if (state[i] === '') {
+                            state[i] = aiPlaysAs;
+                            const val = minimax(state, 0, false);
+                            state[i] = '';
+                            if (val > bestVal) { bestVal = val; bestMoves.length = 0; bestMoves.push(i); }
+                            else if (val === bestVal) bestMoves.push(i);
+                        }
+                    }
+                    return bestMoves[Math.floor(Math.random() * bestMoves.length)];
+                }
+            }
+
+            return chooseMinimaxMove(state);
+        }
+
+        function initializeGame() {
+            gameActive = true;
+            currentPlayer = 'X';
+            humanCanPlay = true; /* ensure input unlocked at start */
+            gameState = Array(9).fill('');
+            statusDisplay.textContent = "Player X's Turn!";
+            overlay.style.display = 'none';
+            gifShowcaseOverlay.style.display = 'none';
+            gifShowcaseImage.src = '';
+            gifButtonContainer.innerHTML = '';
+            cells.forEach(c => {
+                c.innerHTML = '';
+                c.className = 'cell';
+            });
+        }
+
+        function playMoveSFX(player) {
+            try {
+                if (player === 'X') {
+                    xSynth.triggerAttackRelease("C5", "8n");
+                    showSoundEffect("KA-CHINK!", "var(--accent-x)");
+                }
+                else {
+                    oSynth.triggerAttackRelease("G3", "4n");
+                    showSoundEffect("WHUMP!", "var(--accent-o)");
+                }
+            } catch (e) { }
+        }
+
+        function playAIWinGifAndOverlay() {
+    const scene = fightScenes[Math.floor(Math.random() * fightScenes.length)];
+    gifShowcaseImage.src = scene.file;
+
+    gifShowcaseOverlay.style.display = 'flex';
+    overlay.style.display = 'flex';
+    overlayMessage.textContent = "AI STRIKES!";
+
+    // ✅ Add NEW ARENA button for AI win
+    gifButtonContainer.innerHTML = "";
+    const newArena = document.createElement('button');
+    newArena.className = 'comic-button alt';
+    newArena.textContent = 'START NEW ARENA';
+    newArena.addEventListener('click', initializeGame);
+    gifButtonContainer.appendChild(newArena);
+}
+
+
+        function checkResultAndHandle() {
+            const wins = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+
+            for (const [a, b, c] of wins) {
+                if (gameState[a] && gameState[a] === gameState[b] && gameState[b] === gameState[c]) {
+                    gameActive = false;
+                    [a, b, c].forEach(i => cells[i].classList.add('winning-cell'));
+                    try { winSynth.triggerAttackRelease(["C4", "E4", "G4"], "1n"); } catch (e) { }
+                    statusDisplay.textContent =
+                        (gameState[a] === humanPlaysAs) ? "PLAYER WINS!" : "AI WINS!";
+                    overlay.style.display = 'flex';
+                    overlayMessage.textContent =
+                        (gameState[a] === humanPlaysAs) ? "YOU WIN!" : "AI WINS!";
+                    gifButtonContainer.innerHTML = '';
+
+                    if (gameState[a] === humanPlaysAs) {
+                        const randomScene = fightScenes[Math.floor(Math.random() * fightScenes.length)];
+                        const btn = document.createElement('button');
+                        btn.className = 'comic-button';
+                        btn.textContent = 'BONUS SCENE!';
+                        btn.addEventListener('click', () => {
+                            gifShowcaseImage.src = randomScene.file;
+                            gifShowcaseOverlay.style.display = 'flex';
+                        });
+                        const newArc = document.createElement('button');
+                        newArc.className = 'comic-button alt';
+                        newArc.textContent = 'START NEW ARC';
+                        newArc.addEventListener('click', initializeGame);
+                        gifButtonContainer.appendChild(btn);
+                        gifButtonContainer.appendChild(newArc);
+                        return;
+                    } else {
+                        playAIWinGifAndOverlay();
+                        return;
+                    }
+                }
+            }
+
+            if (!gameState.includes('')) {
+                gameActive = false;
+                try { drawNoise.triggerAttackRelease("0.5"); } catch (e) { }
+                statusDisplay.textContent = "DRAW!";
+                overlay.style.display = 'flex';
+                overlayMessage.textContent = "DRAW!";
+                gifButtonContainer.innerHTML = '';
+                const newArc = document.createElement('button');
+                newArc.className = 'comic-button alt';
+                newArc.textContent = 'START NEW ARC';
+                newArc.addEventListener('click', initializeGame);
+                gifButtonContainer.appendChild(newArc);
+                return;
+            }
+
+            currentPlayer = (currentPlayer === 'X') ? 'O' : 'X';
+            statusDisplay.textContent = `Player ${currentPlayer}'s Turn!`;
+        }
+
+        function handleHumanMove(el, index) {
+            if (!gameActive) return;
+
+            /* ✅ Prevent clicks during AI turn */
+            if (!humanCanPlay) return;
+
+            if (gameState[index] !== '') return;
+
+            /* lock human input immediately */
+            humanCanPlay = false;
+
+            gameState[index] = humanPlaysAs;
+            el.innerHTML = `<span class="piece">${humanPlaysAs}</span>`;
+            el.classList.add('x-played');
+            createExplosion(el, humanPlaysAs);
+            playMoveSFX(humanPlaysAs);
+
+            setTimeout(() => checkResultAndHandle(), 260);
+
+            setTimeout(() => {
+                if (gameActive && currentPlayer === aiPlaysAs) {
+                    performAIMove();
+                }
+            }, 520);
+        }
+
+        function performAIMove() {
+            if (!gameActive) return;
+
+            const idx = chooseAIMove(gameState.slice());
+            if (idx === -1 || idx === undefined) return;
+
+            setTimeout(() => {
+                const cell = Array.from(cells).find(c => parseInt(c.dataset.index) === idx);
+                gameState[idx] = aiPlaysAs;
+                cell.innerHTML = `<span class="piece">${aiPlaysAs}</span>`;
+                cell.classList.add('o-played');
+                createExplosion(cell, aiPlaysAs);
+                playMoveSFX(aiPlaysAs);
+
+                /* ✅ When AI finishes, allow player to click again */
+                humanCanPlay = true;
+
+                setTimeout(() => checkResultAndHandle(), 300);
+            }, 380);
+        }
+
+        cells.forEach(c => {
+            const i = parseInt(c.dataset.index);
+            c.addEventListener('click', () => handleHumanMove(c, i));
+        });
+
+        gifShowcaseOverlay.addEventListener('click', () => {
+            gifShowcaseOverlay.style.display = 'none';
+            gifShowcaseImage.src = '';
+        });
+
+        resetButton.addEventListener('click', initializeGame);
+
+        let selectedTile = tileEasy;
+        function selectTile(tile) {
+            [tileEasy, tileMed, tileHard, tileImp].forEach(t => t.classList.remove('selected'));
+            tile.classList.add('selected');
+            aiDifficulty = tile.dataset.diff;
+        }
+
+        selectTile(tileEasy);
+
+        [tileEasy, tileMed, tileHard, tileImp].forEach(t => {
+            t.addEventListener('click', () => selectTile(t));
+        });
+
+        btnStart.addEventListener('click', () => {
+            modeScreen.style.display = 'none';
+            initializeGame();
+        });
+
+        btnGuest.addEventListener('click', () => {
+            const arr = ['easy', 'medium', 'hard', 'impossible'];
+            const pick = arr[Math.floor(Math.random() * arr.length)];
+            aiDifficulty = pick;
+            const map = { easy: tileEasy, medium: tileMed, hard: tileHard, impossible: tileImp };
+            selectTile(map[pick]);
+            modeScreen.style.display = 'none';
+            initializeGame();
+        });
+
+        initializeGame();
+    </script>
+</body>
+
+</html>
