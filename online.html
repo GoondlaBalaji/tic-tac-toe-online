@@ -318,6 +318,7 @@
   /* FULLSCREEN CINEMATIC GIF */
 /* FULLSCREEN CINEMATIC GIF - improved for mobile cover and rotation */
 /* FULLSCREEN GIF OVERLAY */
+/* Simple Full Height GIF (No crop, no zoom) */
 #gif-showcase-overlay {
   position: fixed;
   inset: 0;
@@ -327,6 +328,21 @@
   justify-content: center;
   z-index: 10000;
   overflow: hidden;
+}
+
+/* The GIF itself */
+#gif-showcase-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  
+  /* KEY PART: height fills screen */
+  height: 100vh;
+  width: auto;
+
+  object-fit: contain;   /* NO crop */
+  background: black;
 }
 
 /* WRAPPER to help with rotation + centering */
@@ -339,18 +355,6 @@
   overflow: hidden;
 }
 
-/* GIF defaults */
-#gif-showcase-image {
-  position: absolute;
-  max-width: none !important;
-  max-height: none !important;
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
-  transform: translate(-50%, -50%);
-  top: 50%;
-  left: 50%;
-}
 
 /* MOBILE PORTRAIT → Rotate GIF to fill screen */
 @media (max-width: 900px) and (orientation: portrait) {
@@ -755,20 +759,8 @@ function drawBoard(board) {
 
 /* ------------------ GIF Showcase ------------------ */
 function showGifScene(gifFile) {
-  if (!gifFile) return;
-
-  gifShowcaseImage.onload = () => {
-    const isPortrait = gifShowcaseImage.naturalHeight > gifShowcaseImage.naturalWidth;
-
-    if (isPortrait) {
-      gifShowcaseImage.classList.add("portrait");
-    } else {
-      gifShowcaseImage.classList.remove("portrait");
-    }
-  };
-
   gifShowcaseImage.src = gifFile;
-  gifShowcaseOverlay.style.display = 'flex';
+  gifShowcaseOverlay.style.display = "flex";
 }
 
 
@@ -1199,6 +1191,7 @@ boot();
 </script>
 </body>
 </html>
+
 
 
 
