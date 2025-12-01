@@ -319,6 +319,7 @@
 /* FULLSCREEN CINEMATIC GIF - improved for mobile cover and rotation */
 /* FULLSCREEN GIF OVERLAY */
 /* Simple Full Height GIF (No crop, no zoom) */
+/* GIF overlay */
 #gif-showcase-overlay {
   position: fixed;
   inset: 0;
@@ -330,19 +331,23 @@
   overflow: hidden;
 }
 
-/* The GIF itself */
+/* Image default — full height */
 #gif-showcase-image {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  
-  /* KEY PART: height fills screen */
   height: 100vh;
   width: auto;
+  object-fit: contain;
+}
 
-  object-fit: contain;   /* NO crop */
-  background: black;
+/* Rotate only when needed */
+#gif-showcase-image.rotate-mobile {
+  transform: translate(-50%, -50%) rotate(90deg);
+  height: 100vw;
+  width: auto;
+  object-fit: contain;
 }
 
 /* WRAPPER to help with rotation + centering */
@@ -760,7 +765,21 @@ function drawBoard(board) {
 /* ------------------ GIF Showcase ------------------ */
 function showGifScene(gifFile) {
   gifShowcaseImage.src = gifFile;
-  gifShowcaseOverlay.style.display = "flex";
+
+  gifShowcaseImage.onload = () => {
+    const w = gifShowcaseImage.naturalWidth;
+    const h = gifShowcaseImage.naturalHeight;
+
+    // RESET previous rotation
+    gifShowcaseImage.classList.remove("rotate-mobile");
+
+    // Only rotate on phones AND when GIF is landscape
+    if (window.innerWidth < 900 && h > w) {
+      gifShowcaseImage.classList.add("rotate-mobile");
+    }
+
+    gifShowcaseOverlay.style.display = "flex";
+  };
 }
 
 
@@ -1191,6 +1210,7 @@ boot();
 </script>
 </body>
 </html>
+
 
 
 
