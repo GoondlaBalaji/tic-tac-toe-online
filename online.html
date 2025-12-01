@@ -1006,17 +1006,21 @@ function startListening() {
     drawBoard(data.board || ["","","","","","","","",""]);
 
     /* ---------------- Standard State ---------------- */
-    if (!data.result) {
-      gameActive = true;
-      currentResult = "";
-      if (data.turn === player) {
-        const color = (player === "X")
-          ? "var(--accent-x)" : "var(--accent-o)";
-        setStatus("Your turn (" + player + ")", color);
-      } else {
-        setStatus("Opponent's turn");
-      }
-    }
+if (!data.result) {
+  gameActive = true;
+  currentResult = "";
+
+  if (data.turn === player) {
+    const color = (player === "X") ? "var(--accent-x)" : "var(--accent-o)";
+    setStatus("Your turn (" + player + ")", color);
+  } else {
+    const opp = (player === "X") ? "O" : "X";
+    const oppColor = (opp === "X") ? "var(--accent-x)" : "var(--accent-o)";
+    setStatus("Opponent's turn (" + opp + ")", oppColor);
+  }
+}
+
+
   });
 }
 
@@ -1046,14 +1050,17 @@ async function restartGame() {
 
     /* ⭐ IMPORTANT ⭐
        Set restart_flag so guest reloads automatically */
-    await update(roomRef, {
-      board: ["","","","","","","","",""],
-      turn: "X",
-      result: "",
-      gif_action: null,
-      restart_flag: true,
-      updatedAt: Date.now()
-    });
+    const randomFirst = Math.random() < 0.5 ? "X" : "O";
+
+await update(roomRef, {
+  board: ["","","","","","","","",""],
+  turn: randomFirst,
+  result: "",
+  gif_action: null,
+  restart_flag: true,
+  firstTurn: randomFirst,
+  updatedAt: Date.now()
+});
 
     // HOST does NOT refresh — only resets UI locally
     overlay.style.display = "none";
@@ -1071,7 +1078,19 @@ async function restartGame() {
       c.className = "cell";
     });
 
-    setStatus("Your turn (X)", "var(--accent-x)");
+    const first = randomFirst;
+const playerColor =
+  (first === player)
+    ? (player === "X" ? "var(--accent-x)" : "var(--accent-o)")
+    : ((player === "X") ? "var(--accent-o)" : "var(--accent-x)");
+
+if (first === player) {
+  setStatus("Your turn (" + player + ")", playerColor);
+} else {
+  const opp = (player === "X") ? "O" : "X";
+  setStatus("Opponent's turn (" + opp + ")", playerColor);
+}
+
 
   } catch(err) {
     console.error("Restart failed:", err);
@@ -1122,37 +1141,43 @@ async function boot() {
   const snap = await get(roomRef);
 
   /* ---------- HOST ---------- */
-  if (mode === "room_host") {
+/* ---------- HOST ---------- */
+if (mode === "room_host") {
 
-    if (!snap.exists()) {
-      await set(roomRef, {
-        board:["","","","","","","","",""],
-        turn:"X",
-        result:"",
-        hostPresent:true,
-        guestPresent:false,
-        gif_action:null,
-        restart_flag:false,
-        updatedAt: Date.now()
-      });
-    } else {
-      await update(roomRef, {
-        hostPresent:true,
-        updatedAt: Date.now()
-      });
-    }
+  if (!snap.exists()) {
+    const randomFirst = Math.random() < 0.5 ? "X" : "O";
 
-    player = "X";
-    setStatus("Waiting for guest...", "var(--accent-x)");
+    await set(roomRef, {
+      board:["","","","","","","","",""],
+      turn: randomFirst,
+      result:"",
+      hostPresent:true,
+      guestPresent:false,
+      gif_action:null,
+      restart_flag:false,
+      updatedAt: Date.now(),
+      firstTurn: randomFirst
+    });
 
-    try {
-      const od = onDisconnect(roomRef);
-      if (od && od.remove) od.remove();
-    } catch {}
-
-    startListening();
-    return;
+  } else {
+    await update(roomRef, {
+      hostPresent:true,
+      updatedAt: Date.now()
+    });
   }
+
+  player = "X";
+  setStatus("Waiting for guest...", "var(--accent-x)");
+
+  try {
+    const od = onDisconnect(roomRef);
+    if (od && od.remove) od.remove();
+  } catch {}
+
+  startListening();
+  return;
+}
+
 
   /* ---------- GUEST ---------- */
   if (mode === "room_join") {
@@ -1208,6 +1233,7 @@ boot();
 </script>
 </body>
 </html>
+
 
 
 
