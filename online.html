@@ -317,6 +317,7 @@
   /* -------------- GIF Overlay -------------- */
   /* FULLSCREEN CINEMATIC GIF */
 /* FULLSCREEN CINEMATIC GIF - improved for mobile cover and rotation */
+/* FULLSCREEN GIF OVERLAY */
 #gif-showcase-overlay {
   position: fixed;
   inset: 0;
@@ -328,31 +329,39 @@
   overflow: hidden;
 }
 
-/* put overlay contents in a wrapper to handle rotation/centering reliably */
-#gif-showcase-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
+/* WRAPPER to help with rotation + centering */
+#gif-wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 
-/* image: default desktop behavior, maintain aspect and never exceed viewport */
+/* GIF defaults */
 #gif-showcase-image {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  max-width: 100vw;
-  max-height: 100vh;
-  width: auto;
-  height: auto;
+  max-width: none !important;
+  max-height: none !important;
+  width: 100vw;
+  height: 100vh;
   object-fit: cover;
-  will-change: transform;
-  image-rendering: auto;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
 }
+
+/* MOBILE PORTRAIT → Rotate GIF to fill screen */
+@media (max-width: 900px) and (orientation: portrait) {
+  #gif-showcase-image.portrait {
+    transform: translate(-50%, -50%) rotate(90deg);
+    width: 100vh;
+    height: 100vw;
+    object-fit: cover;
+  }
+}
+
 
 /* loading spinner */
 #gif-loading {
@@ -380,19 +389,6 @@
 @keyframes blink {
   0%, 80%, 100% { opacity: 0.12 }
   40% { opacity: 1 }
-}
-
-/* MOBILE: rotate GIF to landscape fullscreen and make it cover */
-@media (max-width: 900px) and (orientation: portrait) {
-  /* rotate wrapper so we can simplify sizing */
-  #gif-showcase-image {
-    /* rotate 90deg so the GIF appears landscape */
-    transform: translate(-50%, -50%) rotate(90deg);
-    /* Use viewport height as width after rotation so it fills screen */
-    width: calc(100vh + 2px);   /* tiny +2px to avoid 1px gap on some browsers */
-    height: auto;
-    object-fit: cover;
-  }
 }
 
 /* Additional fallback for very narrow screens */
@@ -760,9 +756,21 @@ function drawBoard(board) {
 /* ------------------ GIF Showcase ------------------ */
 function showGifScene(gifFile) {
   if (!gifFile) return;
+
+  gifShowcaseImage.onload = () => {
+    const isPortrait = gifShowcaseImage.naturalHeight > gifShowcaseImage.naturalWidth;
+
+    if (isPortrait) {
+      gifShowcaseImage.classList.add("portrait");
+    } else {
+      gifShowcaseImage.classList.remove("portrait");
+    }
+  };
+
   gifShowcaseImage.src = gifFile;
   gifShowcaseOverlay.style.display = 'flex';
 }
+
 
 /* ------------------ Local Win Check ------------------ */
 function checkLocalWin(board, marker) {
@@ -1191,6 +1199,7 @@ boot();
 </script>
 </body>
 </html>
+
 
 
 
