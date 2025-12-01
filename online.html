@@ -365,11 +365,11 @@
 
 /* MOBILE PORTRAIT → Rotate GIF to fill screen */
 @media (max-width: 900px) and (orientation: portrait) {
-  #gif-showcase-image.portrait {
+  #gif-showcase-image.rotate-mobile {
     transform: translate(-50%, -50%) rotate(90deg);
-    width: 100vh;
     height: 100vw;
-    object-fit: cover;
+    width: auto;
+    object-fit: contain;
   }
 }
 
@@ -769,21 +769,16 @@ function showGifScene(gifFile) {
   gifShowcaseImage.src = gifFile;
 
   gifShowcaseImage.onload = () => {
-    const w = gifShowcaseImage.naturalWidth;
-    const h = gifShowcaseImage.naturalHeight;
-
-    // RESET previous rotation
     gifShowcaseImage.classList.remove("rotate-mobile");
 
-    // Only rotate on phones AND when GIF is landscape
-    if (window.innerWidth < 900 && h > w) {
+    // FORCE rotate GIF on mobile portrait
+    if (window.innerWidth < 900 && window.innerHeight > window.innerWidth) {
       gifShowcaseImage.classList.add("rotate-mobile");
     }
 
     gifShowcaseOverlay.style.display = "flex";
   };
 }
-
 
 
 /* ------------------ Local Win Check ------------------ */
@@ -1213,6 +1208,7 @@ boot();
 </script>
 </body>
 </html>
+
 
 
 
