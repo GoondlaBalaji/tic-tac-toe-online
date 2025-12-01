@@ -32,16 +32,17 @@
             background-position: 0 0, 6px 6px;
 
             overflow: hidden;
+            padding: 10px;
         }
 
         /* PANEL */
         #menu-box {
             background: var(--paper);
             border: 8px solid var(--ink);
-            box-shadow: 15px 15px 0 var(--ink);
-            padding: 30px;
-            max-width: 450px;
-            width: 90%;
+            box-shadow: 12px 12px 0 var(--ink);
+            padding: 28px;
+            max-width: 420px;
+            width: 95%;
             transform: skewX(-5deg);
             text-align: center;
         }
@@ -53,24 +54,24 @@
         /* TITLE */
         #title {
             font-family: 'Bangers', cursive;
-            font-size: 3.5em;
+            font-size: 2.8em;
             color: var(--accent-red);
-            text-shadow: 4px 4px 0 var(--ink);
-            margin-bottom: 10px;
+            text-shadow: 3px 3px 0 var(--ink);
+            margin-bottom: 15px;
         }
 
         /* MAIN BUTTONS */
         .menu-btn {
             font-family: 'Bangers', cursive;
-            font-size: 2em;
+            font-size: 1.6em;
             background: var(--accent-green);
             border: 5px solid var(--ink);
             color: var(--paper);
-            padding: 15px 20px;
+            padding: 12px 15px;
             width: 100%;
-            margin: 15px 0;
+            margin: 12px 0;
             cursor: pointer;
-            box-shadow: 6px 6px 0 var(--ink);
+            box-shadow: 5px 5px 0 var(--ink);
             transition: 0.1s;
         }
 
@@ -86,7 +87,7 @@
         }
 
         .option-title {
-            font-size: 2em;
+            font-size: 1.8em;
             margin-bottom: 10px;
             color: var(--accent-blue);
         }
@@ -99,7 +100,7 @@
             width: 90%;
             padding: 10px;
             border: 4px solid var(--ink);
-            font-size: 1.5em;
+            font-size: 1.4em;
             text-align: center;
             margin-bottom: 10px;
         }
@@ -107,10 +108,55 @@
         #generated-code {
             background: yellow;
             border: 4px solid var(--ink);
-            font-size: 1.6em;
+            font-size: 1.4em;
             padding: 10px;
             margin-top: 10px;
             display: none;
+        }
+
+        /* 📱 MOBILE RESPONSIVE FIXES */
+        @media (max-width: 600px) {
+
+            body {
+                padding: 5px;
+            }
+
+            #menu-box {
+                padding: 20px;
+                border-width: 6px;
+                box-shadow: 8px 8px 0 var(--ink);
+            }
+
+            #title {
+                font-size: 2.2em;
+            }
+
+            .menu-btn {
+                font-size: 1.4em;
+                padding: 10px 12px;
+                box-shadow: 4px 4px 0 var(--ink);
+            }
+
+            #room-code-input {
+                font-size: 1.2em;
+            }
+
+            #generated-code {
+                font-size: 1.2em;
+            }
+        }
+
+        @media (max-width: 380px) {
+            #title {
+                font-size: 1.9em;
+            }
+            .menu-btn {
+                font-size: 1.2em;
+                padding: 9px;
+            }
+            #menu-box {
+                padding: 18px;
+            }
         }
 
     </style>
@@ -144,7 +190,6 @@
     <!-- FIREBASE + LOGIC -->
     <script type="module">
 
-        /* FIREBASE IMPORTS */
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
         import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
@@ -161,16 +206,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        /* PAGE REDIRECTS */
-        window.goOffline = function () {
-            window.location.href = "game.html?mode=offline";
-        };
+        window.goOffline = () => window.location.href = "game.html?mode=offline";
+        window.goAI = () => window.location.href = "ai.html?mode=ai";
 
-        window.goAI = function () {
-            window.location.href = "ai.html?mode=ai";
-        };
-
-        window.toggleRoom = function () {
+        window.toggleRoom = () => {
             const box = document.getElementById("room-options");
             box.style.display = box.style.display === "block" ? "none" : "block";
         };
@@ -210,10 +249,7 @@
         window.joinRoom = function () {
             const code = document.getElementById("room-code-input").value.trim().toUpperCase();
 
-            if (!code) {
-                alert("Enter a room code!");
-                return;
-            }
+            if (!code) return alert("Enter a room code!");
 
             window.location.href = `online.html?mode=room_join&code=${code}`;
         };
@@ -222,3 +258,4 @@
 
 </body>
 </html>
+
