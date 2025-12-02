@@ -149,6 +149,15 @@ body {
         padding: 7px;
     }
 }
+
+    .clean-code {
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-size: 1.2em;
+    color: black;
+}
+
 </style>
 
 
@@ -213,7 +222,8 @@ body {
 
             const codeBox = document.getElementById("generated-code");
             codeBox.style.display = "block";
-            codeBox.innerHTML = `ROOM CODE: <b>${code}</b>`;
+            codeBox.innerHTML = `ROOM CODE: <span class="clean-code">${code}</span>`;
+
 
             const roomRef = ref(db, "rooms/" + code);
 
@@ -250,6 +260,7 @@ body {
 
 </body>
 </html>
+
 
 
 
