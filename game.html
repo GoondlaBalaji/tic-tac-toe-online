@@ -2,757 +2,464 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Tic-Tac-Toe: KA-POW! Edition (Advanced)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>Tic-Tac-Toe: KA-POW! Offline</title>
+
+    <!-- FONTS -->
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Permanent+Marker&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
     <style>
-        /* --- COMIC THEME VARIABLES --- */
-        :root {
-            --font-bangers: 'Bangers', cursive;
-            --font-marker: 'Permanent Marker', cursive;
-            --font-handwritten: 'Kalam', cursive;
-            --color-ink: #1a1a1a;
-            --color-paper: #f5f5f0;
-            --color-accent-x: #FF4500; /* Bright Red/Orange for X */
-            --color-accent-o: #1E90FF; /* Bright Blue for O */
-            --color-win-line: #32CD32; /* Lime Green for Win */
-            --panel-stroke-width: 6px;
-        }
+/* ===========================================================
+   COMIC STYLE VARIABLES
+   =========================================================== */
+:root {
+    --font-bangers: 'Bangers', cursive;
+    --font-marker: 'Permanent Marker', cursive;
+    --font-hand: 'Kalam', cursive;
 
-        /* --- BASE STYLES & BACKGROUND --- */
-        *, *::before, *::after { box-sizing: border-box; }
-        body {
-            font-family: var(--font-handwritten);
-            color: var(--color-ink);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            height: 100vh; /* prevent vertical scrollbar */
-            width: 100vw;  /* prevent horizontal scrollbar */
-            overflow: hidden; /* remove scrollbars */
-            background: var(--color-paper);
-            background-image:
-                radial-gradient(var(--color-ink) 0.5px, transparent 0.5px),
-                radial-gradient(var(--color-ink) 0.5px, var(--color-paper) 0.5px);
-            background-size: 12px 12px;
-            background-position: 0 0, 6px 6px;
-        }
+    --ink: #111;
+    --paper: #f7f7f2;
 
-        /* --- GAME CONTAINER (THE MAIN PANEL) --- */
-        #game-container {
-            width: 95%;
-            max-width: 550px;
-            padding: 30px;
-            background: var(--color-paper);
-            border: var(--panel-stroke-width) solid var(--color-ink);
-            box-shadow: 15px 15px 0 rgba(0, 0, 0, 0.8);
-            position: relative;
-            transform: skewX(-3deg);
-            transition: all 0.3s ease-out;
-            margin: 20px auto;
-            min-height: auto;
-        }
+    --x-color: #ff4500;
+    --o-color: #1e90ff;
 
-        /* use this when game ends */
-        #game-container.game-ending {
-            animation: gameSlam 0.5s ease-out forwards;
-        }
+    --win-line: #32cd32;
+}
 
-        @keyframes gameSlam {
-            0% {
-                transform: skewX(-3deg) scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: skewX(-10deg) scale(1.05) translateY(-10px);
-                box-shadow: 20px 20px 0 rgba(0, 0, 0, 1);
-            }
-            100% {
-                transform: skewX(-3deg) scale(0.95);
-                opacity: 0.8;
-            }
-        }
+/* ===========================================================
+   GLOBAL RESET + FULLSCREEN FIX
+   =========================================================== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-        #game-container > * { transform: skewX(3deg); } /* Counter-skew children */
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;        /* 🔥 No scrollbars */
+    background: var(--paper);
+}
 
-        /* --- TITLE & STATUS --- */
-        #title {
-            font-family: var(--font-bangers);
-            font-size: clamp(2.5em, 8vw, 4.5em);
-            text-align: center;
-            margin-bottom: 20px;
-            color: var(--color-accent-x);
-            position: relative;
-            text-shadow: 4px 4px 0 var(--color-ink), -2px -2px 0 var(--color-ink);
-            animation: titleEntrance 1s ease-out;
-        }
+/* ===========================================================
+   COMIC DOT BACKGROUND
+   =========================================================== */
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-        @keyframes titleEntrance {
-            0% {
-                transform: translateY(-40px) scale(0.8);
-                opacity: 0;
-            }
-            60% {
-                transform: translateY(10px) scale(1.1);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
-        }
+    background-image:
+        radial-gradient(var(--ink) 0.6px, transparent 0.6px),
+        radial-gradient(var(--ink) 0.6px, var(--paper) 0.6px);
+    background-size: 14px 14px;
+    background-position: 0 0, 7px 7px;
+}
 
-        #status {
-            font-family: var(--font-marker);
-            font-size: 1.8em;
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 2px dashed var(--color-ink);
-            background-color: rgba(255, 255, 255, 0.7);
-            min-height: 50px;
-        }
+/* ===========================================================
+   MAIN GAME PANEL — PERFECT FOR MOBILE
+   =========================================================== */
+#game-container {
+    width: 90vw;
+    max-width: 360px;              /* 🔥 Smaller for phone */
+    background: var(--paper);
+    border: 6px solid var(--ink);
+    box-shadow: 10px 10px 0 var(--ink);
+    padding: 18px;
+    transform: skewX(-3deg);
+}
 
-        /* --- GAME BOARD --- */
-        #board {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: var(--panel-stroke-width);
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            background-color: var(--color-ink);
-            position: relative;
-        }
+#game-container > * {
+    transform: skewX(3deg);        /* Fix skew for children */
+}
 
-        .cell {
-            background-color: var(--color-paper);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: var(--font-marker);
-            font-size: clamp(3em, 15vw, 6em);
-            cursor: pointer;
-            user-select: none;
-            transition: background-color 0.1s ease;
-            position: relative;
-            overflow: hidden;
-            border: 2px solid var(--color-ink);
-        }
+/* ===========================================================
+   TITLE
+   =========================================================== */
+#title {
+    font-family: var(--font-bangers);
+    font-size: 2.7em;
+    text-align: center;
+    color: var(--x-color);
+    text-shadow: 4px 4px 0 var(--ink);
+    margin-bottom: 10px;
+}
 
-        .cell:hover {
-            background-color: #eee;
-        }
+/* ===========================================================
+   STATUS BAR
+   =========================================================== */
+#status {
+    font-family: var(--font-marker);
+    font-size: 1.4em;
+    text-align: center;
+    margin-bottom: 14px;
+    padding: 8px;
+    border: 2px dashed var(--ink);
+    background: #ffffffbb;
+}
 
-        /* Piece Styling */
-        .cell .piece {
-            opacity: 0;
-            transform: scale(0.5) rotate(360deg);
-            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.3s ease;
-            position: relative;
-            line-height: 1;
-        }
+/* ===========================================================
+   BOARD (3×3)
+   =========================================================== */
+#board {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    background: var(--ink);
+}
 
-        .cell.x-played .piece {
-            color: var(--color-accent-x);
-            transform: scale(1) rotate(0deg);
-            opacity: 1;
-            text-shadow: 5px 5px 0 var(--color-ink), -2px -2px 0 var(--color-accent-x);
-            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-        }
+.cell {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-        .cell.o-played .piece {
-            color: var(--color-accent-o);
-            transform: scale(1) rotate(0deg);
-            opacity: 1;
-            text-shadow: 5px 5px 0 var(--color-ink), -2px -2px 0 var(--color-accent-o);
-            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-        }
+    font-family: var(--font-marker);
+    font-size: 3.2em;
+    user-select: none;
+    cursor: pointer;
+}
 
-        /* Advanced Move Animation (Initial Pop) */
-        @keyframes popIn {
-            0% { transform: scale(0) rotate(360deg); opacity: 0; }
-            50% { transform: scale(1.5) rotate(-10deg); opacity: 1; }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
-        
-        /* --- EXPLOSION PARTICLE EFFECT (Comic Impact) --- */
-        .explosion {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: currentColor; /* Inherit X or O color */
-            animation: explode 0.5s forwards ease-out;
-            opacity: 0;
-            z-index: 5;
-        }
-        
-        @keyframes explode {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
-        }
+/* X & O styles */
+.cell.x-played .piece {
+    color: var(--x-color);
+    text-shadow: 3px 3px 0 var(--ink);
+}
 
-        /* --- WIN ANIMATION EFFECTS --- */
-        #board::before {
-            content: '';
-            position: absolute;
-            z-index: 10;
-            background: var(--color-win-line);
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0);
-            transition: opacity 0.5s, transform 0.5s;
-            box-shadow: 0 0 20px var(--color-win-line);
-            border: 4px solid var(--color-ink);
-        }
+.cell.o-played .piece {
+    color: var(--o-color);
+    text-shadow: 3px 3px 0 var(--ink);
+}
 
-        .win-line-active { opacity: 1 !important; transform: translate(-50%, -50%) scale(1) !important; }
+/* ===========================================================
+   WINNING CELL HIGHLIGHT
+   =========================================================== */
+.cell.winning {
+    background: var(--win-line) !important;
+    border-color: var(--ink) !important;
+}
 
-        .row0-win::before { width: 90%; height: 20px; top: 16.66%; left: 50%; }
-        .row1-win::before { width: 90%; height: 20px; top: 50%; left: 50%; }
-        .row2-win::before { width: 90%; height: 20px; top: 83.33%; left: 50%; }
+/* ===========================================================
+   RESET BUTTON
+   =========================================================== */
+#reset-button {
+    margin-top: 16px;
+    width: 100%;
+    padding: 10px;
 
-        .col0-win::before { width: 20px; height: 90%; top: 50%; left: 16.66%; }
-        .col1-win::before { width: 20px; height: 90%; top: 50%; left: 50%; }
-        .col2-win::before { width: 20px; height: 90%; top: 50%; left: 83.33%; }
+    font-family: var(--font-bangers);
+    font-size: 1.4em;
+    background: var(--win-line);
+    border: 4px solid var(--ink);
+    color: var(--paper);
+    box-shadow: 4px 4px 0 var(--ink);
+}
+#reset-button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--ink);
+}
 
-        .diag0-win::before { width: 120%; height: 20px; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg) scale(1.05); }
-        .diag1-win::before { width: 120%; height: 20px; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg) scale(1.05); }
+/* ===========================================================
+   GAME OVER OVERLAY (WIN/LOSE/DRAW)
+   =========================================================== */
+#game-over-overlay {
+    position: fixed;
+    inset: 0;
+    background: #000000dd;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 9999;
+}
 
-        .cell.winning-cell {
-            animation: winningPulse 0.5s infinite alternate;
-            background-color: var(--color-win-line) !important;
-            border-color: var(--color-win-line) !important;
-        }
-        .cell.winning-cell .piece {
-            color: var(--color-ink) !important;
-            text-shadow: 2px 2px 0 var(--color-paper), -2px -2px 0 var(--color-paper);
-        }
+.game-over-message {
+    font-family: var(--font-bangers);
+    font-size: 3.5em;
+    color: var(--paper);
+    text-shadow: 5px 5px 0 var(--ink);
+    margin-bottom: 20px;
+}
 
-        @keyframes winningPulse {
-            from { box-shadow: 0 0 10px var(--color-win-line); }
-            to { box-shadow: 0 0 25px var(--color-win-line), 0 0 35px var(--color-paper); }
-        }
+/* ===========================================================
+   GIF SHOWCASE FULLSCREEN (Same as online.html)
+   =========================================================== */
+#gif-showcase-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    background: black;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+}
 
-        /* --- GAME OVER/POP-UP EFFECT --- */
-        #game-over-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(26, 26, 26, 0.9);
-            display: none; /* Controlled by JS */
-            align-items: center;
-            justify-content: center;
-            z-index: 20;
-            perspective: 1000px;
-            flex-direction: column;
-            cursor: default;
-        }
+#gif-showcase-image {
+    height: 100vh;              /* 🔥 Touch top & bottom */
+    width: auto;
+    object-fit: contain;
+    transform: scale(0.88);     /* 🔥 Same perfect size as online.html */
+}
 
-        .game-over-message {
-            font-family: var(--font-bangers);
-            font-size: clamp(3em, 12vw, 6em);
-            color: var(--color-accent-x);
-            padding: 20px;
-            background: var(--color-paper);
-            border: 8px double var(--color-ink);
-            box-shadow: 10px 10px 0 var(--color-ink);
-            transform: scale(0) rotateX(90deg);
-            animation: messagePop 0.8s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            text-align: center;
-            line-height: 1.1;
-            margin-bottom: 20px;
-        }
+#gif-showcase-image.rotate-mobile {
+    height: 100vw;
+    width: auto;
+    transform: translate(-0%, -0%) rotate(90deg) scale(0.88);
+}
 
-        @keyframes messagePop {
-            0% { transform: scale(0) rotateX(90deg); opacity: 0; }
-            70% { transform: scale(1.2) rotateX(-5deg); opacity: 1; }
-            100% { transform: scale(1) rotateX(0deg); opacity: 1; }
-        }
-
-        /* --- BUTTONS --- */
-        .button-section {
-            display: flex;
-            justify-content: center;
-            margin-top: 30px;
-            transform: skewX(3deg);
-        }
-
-        .comic-button {
-            font-family: var(--font-bangers);
-            font-size: 1.5em;
-            padding: 10px 20px;
-            background-color: var(--color-win-line);
-            color: var(--color-paper);
-            border: 4px solid var(--color-ink);
-            box-shadow: 4px 4px 0 var(--color-ink);
-            cursor: pointer;
-            transition: all 0.1s ease-in-out;
-            text-shadow: 2px 2px 0 var(--color-ink);
-            margin: 0 5px;
-        }
-
-        .comic-button:hover {
-            background-color: #38c738;
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0 var(--color-ink);
-        }
-        
-        /* GIF Button Container - ensure visible when overlay shows */
-        #gif-button-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            align-items: center;
-            opacity: 1;
-        }
-
-        /* --- SOUND EFFECT DISPLAY (The Floating Text) --- */
-        #sound-effect-display {
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%) scale(0.5);
-            font-family: var(--font-bangers);
-            font-size: clamp(3em, 15vw, 10em);
-            color: var(--color-accent-x);
-            text-shadow: 5px 5px 0 var(--color-ink), -5px -5px 0 var(--color-ink);
-            padding: 10px 20px;
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
-            text-transform: uppercase;
-        }
-        #sound-effect-display.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1) rotate(5deg);
-            animation: shake 0.3s ease-in-out;
-        }
-
-        @keyframes shake {
-            0% { transform: translate(-50%, -50%) scale(1) rotate(5deg); }
-            25% { transform: translate(-52%, -52%) scale(1.1) rotate(-3deg); }
-            50% { transform: translate(-48%, -48%) scale(1) rotate(5deg); }
-            75% { transform: translate(-51%, -51%) scale(1.1) rotate(-3deg); }
-            100% { transform: translate(-50%, -50%) scale(1) rotate(5deg); }
-        }
-
-        /* --- FULL SCREEN GIF OVERLAY (FIXED FOR HORIZONTAL CONTENT) --- */
-        #gif-showcase-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: black; /* Essential for black border effect */
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        }
-
-        #gif-showcase-image {
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* Ensures the whole image is visible within the screen */
-            background: black;
-            border: none !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-        }
-
-        #gif-showcase-overlay img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            background: black;
-            border: none !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-        }
+/* Fix overscroll pull-to-refresh */
+html {
+    overscroll-behavior-y: none;
+}
     </style>
 </head>
+
 <body>
+<div id="game-container">
 
-    <div id="game-container">
-        <h1 id="title">TIC-TAC-TOE!</h1>
-        <div id="status">Player X's Turn!</div>
-        
-        <div id="board">
-            <div class="cell" data-index="0"></div>
-            <div class="cell" data-index="1"></div>
-            <div class="cell" data-index="2"></div>
-            <div class="cell" data-index="3"></div>
-            <div class="cell" data-index="4"></div>
-            <div class="cell" data-index="5"></div>
-            <div class="cell" data-index="6"></div>
-            <div class="cell" data-index="7"></div>
-            <div class="cell" data-index="8"></div>
-        </div>
+    <h1 id="title">TIC-TAC-TOE!</h1>
 
-        <div class="button-section">
-            <button id="reset-button" class="comic-button">NEW ARC!</button>
-        </div>
+    <div id="status">Player X's Turn!</div>
 
-        <div id="game-over-overlay">
-            <div class="game-over-message" id="overlay-message"></div>
-            
-            <div id="gif-button-container">
-            </div>
-
-        </div>
+    <!-- GAME BOARD -->
+    <div id="board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
     </div>
 
-    <div id="sound-effect-display"></div>
-    
-    <div id="gif-showcase-overlay">
-        <img id="gif-showcase-image" src="" alt="Fight Scene GIF">
+    <!-- RESET BUTTON -->
+    <button id="reset-button">NEW ARC!</button>
+
+    <!-- GAME OVER OVERLAY -->
+    <div id="game-over-overlay">
+        <div class="game-over-message" id="overlay-message"></div>
+
+        <div id="gif-button-container"></div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log("💥 KA-POW! Tic-Tac-Toe Engine Initializing... 🚀");
+</div>
 
-            const gameContainer = document.getElementById('game-container');
-            const board = document.getElementById('board');
-            const cells = document.querySelectorAll('.cell');
-            const statusDisplay = document.getElementById('status');
-            const resetButton = document.getElementById('reset-button');
-            const overlay = document.getElementById('game-over-overlay');
-            const overlayMessage = document.getElementById('overlay-message');
-            const soundDisplay = document.getElementById('sound-effect-display');
-            const gifButtonContainer = document.getElementById('gif-button-container');
-            const gifShowcaseOverlay = document.getElementById('gif-showcase-overlay');
-            const gifShowcaseImage = document.getElementById('gif-showcase-image');
+<!-- SOUND EFFECT FLOATING TEXT -->
+<div id="sound-effect-display"></div>
 
-            let gameActive = false;
-            let currentPlayer = 'X';
-            let gameState = ["", "", "", "", "", "", "", "", ""];
+<!-- FULLSCREEN GIF SHOWCASE -->
+<div id="gif-showcase-overlay">
+    <img id="gif-showcase-image" src="" alt="Scene GIF">
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
 
-            const winningConditions = [
-                [0, 1, 2, 'row0-win'], [3, 4, 5, 'row1-win'], [6, 7, 8, 'row2-win'], // Rows
-                [0, 3, 6, 'col0-win'], [1, 4, 7, 'col1-win'], [2, 5, 8, 'col2-win'], // Columns
-                [0, 4, 8, 'diag0-win'], [2, 4, 6, 'diag1-win'] // Diagonals
-            ];
-            
-            // --- GIF MAPPING (Requires files named ani1.gif through ani7.gif in an 'animation' folder) ---
-            const fightScenes = [
-                { name: "CRITICAL HOOK", file: "animation/ani3.gif" },
-                { name: "WHIP ATTACK", file: "animation/ani2.gif" },
-                { name: "DUELING STRINGS", file: "animation/ani5.gif" },
-                { name: "SAMURAI CHARGE", file: "animation/ani7.gif" },
-                { name: "AXE PARRY", file: "animation/ani6.gif" },
-                { name: "RISING UPPERCUT", file: "animation/ani1.gif" },
-                { name: "SPEED PUNCH", file: "animation/ani4.gif" },
-            ];
+    const board = document.getElementById("board");
+    const cells = document.querySelectorAll(".cell");
+    const statusDisplay = document.getElementById("status");
+    const resetButton = document.getElementById("reset-button");
 
-            // --- TONE.JS SOUND SETUP (GUARDED TO AVOID 'Tone is not defined' ERRORS) ---
-            let xSynth, oSynth, winSynth, drawNoise;
-            let audioEnabled = false;
+    const overlay = document.getElementById("game-over-overlay");
+    const overlayMessage = document.getElementById("overlay-message");
+    const gifButtonContainer = document.getElementById("gif-button-container");
 
-            if (window.Tone) {
-                xSynth = new Tone.Synth({
-                    oscillator: { type: "sine" },
-                    envelope: { attack: 0.005, decay: 0.1, sustain: 0.1, release: 0.3 },
-                }).toDestination();
+    const gifOverlay = document.getElementById("gif-showcase-overlay");
+    const gifImage = document.getElementById("gif-showcase-image");
 
-                oSynth = new Tone.AMSynth({
-                    harmonicity: 2,
-                    detune: 0,
-                    oscillator: { type: "sawtooth" },
-                    envelope: { attack: 0.05, decay: 0.2, sustain: 0.3, release: 0.5 },
-                    modulation: { type: "square" }
-                }).toDestination();
-                
-                winSynth = new Tone.PolySynth(Tone.Synth, {
-                    oscillator: { type: "triangle" },
-                    envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 3.0 },
-                    volume: -6
-                }).toDestination();
+    const soundText = document.getElementById("sound-effect-display");
 
-                drawNoise = new Tone.NoiseSynth({
-                    noise: { type: "pink" },
-                    envelope: { attack: 0.005, decay: 0.5, sustain: 0, release: 0.01 }
-                }).toDestination();
-                drawNoise.volume.value = -10;
-            } else {
-                console.warn("Tone.js not loaded. Game will run without sound.");
-            }
+    /* ===========================================================
+       GAME STATE
+    ============================================================ */
+    let gameActive = true;
+    let currentPlayer = "X";
+    let gameState = ["", "", "", "", "", "", "", "", ""];
 
-            // Audio Context Fix
-            function enableAudioOnFirstGesture() {
-                if (!audioEnabled && window.Tone) {
-                    Tone.start().then(() => {
-                        audioEnabled = true;
-                        console.log("Audio context started.");
-                    }).catch(err => {
-                        console.warn("Audio context could not start:", err);
-                    });
-                }
-            }
-            document.body.addEventListener('pointerdown', enableAudioOnFirstGesture, { once: true });
-            resetButton.addEventListener('pointerdown', enableAudioOnFirstGesture, { once: true });
+    const wins = [
+        [0,1,2], [3,4,5], [6,7,8],  // rows
+        [0,3,6], [1,4,7], [2,5,8],  // columns
+        [0,4,8], [2,4,6]            // diagonals
+    ];
 
-            // Sound Effect Display
-            function showSoundEffect(text, color) {
-                soundDisplay.textContent = text;
-                soundDisplay.style.color = color;
-                soundDisplay.style.textShadow = `5px 5px 0 var(--color-ink), -5px -5px 0 ${color}`;
-                soundDisplay.classList.add('show');
-                
-                const xOffset = Math.random() * 40 - 20;
-                const yOffset = Math.random() * 40 - 20;
-                soundDisplay.style.transform = `translate(calc(-50% + ${xOffset}px), calc(-50% + ${yOffset}px)) scale(1) rotate(5deg)`;
+    /* ===========================================================
+       FIGHT SCENE GIFS (same as online)
+    ============================================================ */
+    const fightScenes = [
+        { name: "CRITICAL HOOK", file: "animation/ani3.gif" },
+        { name: "WHIP ATTACK", file: "animation/ani2.gif" },
+        { name: "DUELING STRINGS", file: "animation/ani5.gif" },
+        { name: "SAMURAI CHARGE", file: "animation/ani7.gif" },
+        { name: "AXE PARRY", file: "animation/ani6.gif" },
+        { name: "RISING UPPERCUT", file: "animation/ani1.gif" },
+        { name: "SPEED PUNCH", file: "animation/ani4.gif" },
+    ];
 
-                setTimeout(() => {
-                    soundDisplay.classList.remove('show');
-                }, 700);
-            }
+    /* ===========================================================
+       SOUND EFFECTS (simple)
+    ============================================================ */
+    function showSoundEffect(text, color) {
+        soundText.textContent = text;
+        soundText.style.color = color;
+        soundText.style.textShadow = `5px 5px 0 var(--ink)`;
+        soundText.classList.add("show");
 
-            function playMoveSound() {
-                if (!audioEnabled || !window.Tone || !xSynth || !oSynth) return;
+        setTimeout(() => soundText.classList.remove("show"), 600);
+    }
 
-                const color = currentPlayer === 'X' ? 'var(--color-accent-x)' : 'var(--color-accent-o)';
-                if (currentPlayer === 'X') {
-                    xSynth.triggerAttackRelease("C5", "8n");
-                    showSoundEffect("KA-CHINK!", color);
-                } else {
-                    oSynth.triggerAttackRelease("G3", "4n");
-                    showSoundEffect("WHUMP!", color);
-                }
-            }
+    /* ===========================================================
+       GAME INITIALIZE
+    ============================================================ */
+    function initializeGame() {
+        gameActive = true;
+        currentPlayer = "X";
+        gameState = ["", "", "", "", "", "", "", "", ""];
 
-            function playWinSound() {
-                if (!audioEnabled || !window.Tone || !winSynth) return;
-                const notes = ["C4", "E4", "G4", "C5"];
-                winSynth.triggerAttackRelease(notes, "2n");
-                showSoundEffect("KABOOM!", 'var(--color-win-line)');
-            }
+        statusDisplay.textContent = "Player X's Turn!";
+        statusDisplay.style.color = "var(--ink)";
 
-            function playDrawSound() {
-                if (!audioEnabled || !window.Tone || !drawNoise) return;
-                drawNoise.triggerAttackRelease(0.5);
-                showSoundEffect("STALEMATE!", 'var(--color-ink)');
-            }
-
-            function createExplosion(cell, player) {
-                const computed = getComputedStyle(document.documentElement);
-                const color = player === 'X'
-                    ? computed.getPropertyValue('--color-accent-x').trim()
-                    : computed.getPropertyValue('--color-accent-o').trim();
-                const numParticles = 10;
-                
-                for (let i = 0; i < numParticles; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'explosion';
-                    particle.style.color = color || (player === 'X' ? '#FF4500' : '#1E90FF');
-
-                    const angle = Math.random() * 2 * Math.PI;
-                    const distance = Math.random() * 100 + 30;
-                    const dx = Math.cos(angle) * distance;
-                    const dy = Math.sin(angle) * distance;
-
-                    particle.style.setProperty('--dx', `${dx}px`);
-                    particle.style.setProperty('--dy', `${dy}px`);
-                    
-                    particle.style.top = '50%';
-                    particle.style.left = '50%';
-
-                    cell.appendChild(particle);
-                    
-                    setTimeout(() => {
-                        particle.remove();
-                    }, 700);
-                }
-            }
-
-            // --- GAME LOGIC ---
-            function initializeGame() {
-                gameActive = true;
-                currentPlayer = 'X';
-                gameState = ["", "", "", "", "", "", "", "", ""];
-
-                statusDisplay.textContent = "Player X's Turn!";
-                statusDisplay.style.color = 'var(--color-ink)';
-
-                cells.forEach(cell => {
-                    cell.innerHTML = "";
-                    cell.className = 'cell';
-                });
-
-                const allWinClasses = ['row0-win','row1-win','row2-win','col0-win','col1-win','col2-win','diag0-win','diag1-win','win-line-active'];
-                allWinClasses.forEach(cls => board.classList.remove(cls));
-                overlay.style.display = 'none';
-                gameContainer.classList.remove('game-ending');
-                gifButtonContainer.innerHTML = '';
-            }
-
-            function handleCellPlayed(clickedCell, clickedCellIndex) {
-                gameState[clickedCellIndex] = currentPlayer;
-                clickedCell.innerHTML = `<span class="piece">${currentPlayer}</span>`;
-                clickedCell.classList.add(`${currentPlayer.toLowerCase()}-played`);
-                createExplosion(clickedCell, currentPlayer);
-                try { playMoveSound(); } catch (e) { /* fail gracefully if audio blocked */ }
-            }
-
-            function handlePlayerChange() {
-                currentPlayer = currentPlayer === "X" ? "O" : "X";
-                statusDisplay.textContent = `Player ${currentPlayer}'s Turn!`;
-                statusDisplay.style.color = currentPlayer === 'X' ? 'var(--color-accent-x)' : 'var(--color-accent-o)';
-            }
-            
-            function createGifButton(outcome) {
-                gifButtonContainer.innerHTML = '';
-                const randomIndex = Math.floor(Math.random() * fightScenes.length);
-                const randomScene = fightScenes[randomIndex];
-
-                const buttonColor = outcome === 'draw'
-                    ? 'var(--color-ink)'
-                    : (currentPlayer === 'X' ? 'var(--color-accent-x)' : 'var(--color-accent-o)');
-                const buttonBg = outcome === 'draw' ? '#FFD700' : 'var(--color-win-line)';
-
-                const gifButton = document.createElement('button');
-                gifButton.classList.add('comic-button');
-                gifButton.style.backgroundColor = buttonBg;
-                gifButton.style.color = buttonColor;
-                gifButton.style.textShadow = `2px 2px 0 var(--color-ink)`;
-                gifButton.textContent = `BONUS SCENE: ${randomScene.name}!`;
-                
-                gifButton.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    showGifScene(randomScene.file);
-                });
-
-                gifButtonContainer.appendChild(gifButton);
-
-                const newArcButton = document.createElement('button');
-                newArcButton.classList.add('comic-button');
-                newArcButton.textContent = 'START NEW ARC';
-                newArcButton.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    initializeGame();
-                });
-                gifButtonContainer.appendChild(newArcButton);
-            }
-
-            function showGifScene(gifFileName) {
-                gifShowcaseImage.src = gifFileName;
-                gifShowcaseOverlay.style.display = 'flex';
-            }
-
-            function handleResultValidation() {
-                let roundWon = false;
-                let winningClass = '';
-                let winningCells = [];
-
-                for (let i = 0; i < winningConditions.length; i++) {
-                    const winCondition = winningConditions[i];
-                    const [a, b, c, lineClass] = winCondition;
-
-                    if (gameState[a] === '' || gameState[b] === '' || gameState[c] === '') {
-                        continue;
-                    }
-                    if (gameState[a] === gameState[b] && gameState[b] === gameState[c]) {
-                        roundWon = true;
-                        winningClass = lineClass;
-                        winningCells = [a, b, c];
-                        break;
-                    }
-                }
-
-                if (roundWon) {
-                    gameActive = false;
-                    
-                    board.classList.add(winningClass);
-                    setTimeout(() => board.classList.add('win-line-active'), 50);
-                    
-                    winningCells.forEach(index => {
-                        cells[index].classList.add('winning-cell');
-                    });
-
-                    try { playWinSound(); } catch (e) { /* ignore audio errors */ }
-                    statusDisplay.textContent = `PLAYER ${currentPlayer} WINS! (KABOOM!)`;
-                    statusDisplay.style.color = 'var(--color-win-line)';
-
-                    gameContainer.classList.add('game-ending');
-                    setTimeout(() => {
-                        overlayMessage.textContent = `${currentPlayer} WINS!`;
-                        overlay.style.display = 'flex';
-                        overlayMessage.style.color = currentPlayer === 'X' ? 'var(--color-accent-x)' : 'var(--color-accent-o)';
-                        
-                        createGifButton('win');
-                    }, 500);
-
-                    return;
-                }
-
-                let roundDraw = !gameState.includes("");
-                if (roundDraw) {
-                    gameActive = false;
-                    try { playDrawSound(); } catch (e) {}
-                    statusDisplay.textContent = "It's a DRAW!";
-                    statusDisplay.style.color = 'var(--color-ink)';
-
-                    gameContainer.classList.add('game-ending');
-
-                    setTimeout(() => {
-                        overlayMessage.textContent = `DRAW!`;
-                        overlay.style.display = 'flex';
-                        overlayMessage.style.color = 'var(--color-ink)';
-
-                        // No GIF for draw, just the New Arc button
-                        gifButtonContainer.innerHTML = '';
-                        const newArcButton = document.createElement('button');
-                        newArcButton.classList.add('comic-button');
-                        newArcButton.textContent = 'START NEW ARC';
-                        newArcButton.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            initializeGame();
-                        });
-                        gifButtonContainer.appendChild(newArcButton);
-                    }, 400);
-
-                    return;
-                }
-
-                handlePlayerChange();
-            }
-
-            function handleCellClick(e) {
-                const clickedCell = e.target.closest('.cell');
-                if (!clickedCell) return;
-
-                const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
-
-                if (gameState[clickedCellIndex] !== "" || !gameActive) {
-                    return;
-                }
-
-                handleCellPlayed(clickedCell, clickedCellIndex);
-                handleResultValidation();
-            }
-
-            // Event Listeners
-            cells.forEach(cell => cell.addEventListener('click', handleCellClick));
-            resetButton.addEventListener('click', initializeGame);
-            
-            // Close full-screen GIF overlay by clicking anywhere on it
-            gifShowcaseOverlay.addEventListener('click', () => {
-                gifShowcaseOverlay.style.display = 'none';
-                gifShowcaseImage.src = ""; // Clear the GIF source
-            });
-
-            // Initialize the game at load
-            initializeGame();
+        cells.forEach(cell => {
+            cell.textContent = "";
+            cell.className = "cell";
         });
-    </script>
+
+        overlay.style.display = "none";
+        gifButtonContainer.innerHTML = "";
+    }
+
+    /* ===========================================================
+       CELL CLICK
+    ============================================================ */
+    function handleCellClick(e) {
+        const cell = e.target;
+        const index = parseInt(cell.getAttribute("data-index"));
+
+        if (gameState[index] !== "" || !gameActive) return;
+
+        gameState[index] = currentPlayer;
+        cell.innerHTML = `<span class="piece">${currentPlayer}</span>`;
+        cell.classList.add(currentPlayer === "X" ? "x-played" : "o-played");
+
+        showSoundEffect(
+            currentPlayer === "X" ? "KA-CHINK!" : "WHUMP!",
+            currentPlayer === "X" ? "var(--x-color)" : "var(--o-color)"
+        );
+
+        checkResult();
+    }
+
+    /* ===========================================================
+       WIN / DRAW CHECK
+    ============================================================ */
+    function checkResult() {
+
+        let roundWon = false;
+        let winningCombo = [];
+
+        for (let combo of wins) {
+            const [a, b, c] = combo;
+            if (gameState[a] && gameState[a] === gameState[b] && gameState[b] === gameState[c]) {
+                roundWon = true;
+                winningCombo = combo;
+                break;
+            }
+        }
+
+        if (roundWon) {
+            gameActive = false;
+
+            winningCombo.forEach(i => cells[i].classList.add("winning"));
+
+            statusDisplay.textContent = `Player ${currentPlayer} Wins!`;
+            statusDisplay.style.color = "var(--win-line)";
+
+            setTimeout(() => {
+                overlayMessage.textContent = `${currentPlayer} WINS!`;
+                overlay.style.display = "flex";
+                buildGifButtons("win");
+            }, 400);
+
+            return;
+        }
+
+        if (!gameState.includes("")) {
+            gameActive = false;
+            statusDisplay.textContent = "DRAW!";
+            statusDisplay.style.color = "var(--ink)";
+
+            setTimeout(() => {
+                overlayMessage.textContent = "DRAW!";
+                overlay.style.display = "flex";
+                buildGifButtons("draw");
+            }, 400);
+
+            return;
+        }
+
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+        statusDisplay.textContent = `Player ${currentPlayer}'s Turn!`;
+        statusDisplay.style.color =
+            currentPlayer === "X" ? "var(--x-color)" : "var(--o-color)";
+    }
+
+    /* ===========================================================
+       BUILD GIF BUTTON
+    ============================================================ */
+    function buildGifButtons(outcome) {
+        gifButtonContainer.innerHTML = "";
+
+        const scene = fightScenes[Math.floor(Math.random() * fightScenes.length)];
+
+        // BONUS SCENE BUTTON
+        const gifBtn = document.createElement("button");
+        gifBtn.className = "comic-button";
+        gifBtn.textContent = `BONUS SCENE: ${scene.name}!`;
+        gifBtn.onclick = () => showGif(scene.file);
+
+        gifButtonContainer.appendChild(gifBtn);
+
+        // NEW ARC BUTTON
+        const arcBtn = document.createElement("button");
+        arcBtn.className = "comic-button";
+        arcBtn.textContent = "START NEW ARC";
+        arcBtn.onclick = initializeGame;
+
+        gifButtonContainer.appendChild(arcBtn);
+    }
+
+    /* ===========================================================
+       SHOW GIF FULLSCREEN
+    ============================================================ */
+    function showGif(file) {
+        gifImage.src = file;
+        gifOverlay.style.display = "flex";
+
+        const isPortrait = window.innerHeight > window.innerWidth;
+        if (isPortrait) {
+            gifImage.classList.add("rotate-mobile");
+        } else {
+            gifImage.classList.remove("rotate-mobile");
+        }
+    }
+
+    gifOverlay.onclick = () => {
+        gifOverlay.style.display = "none";
+        gifImage.src = "";
+        gifImage.classList.remove("rotate-mobile");
+    };
+
+    /* ===========================================================
+       EVENT LISTENERS
+    ============================================================ */
+    cells.forEach(cell => cell.addEventListener("click", handleCellClick));
+    resetButton.addEventListener("click", initializeGame);
+
+    /* START GAME */
+    initializeGame();
+});
+</script>
+
 </body>
 </html>
 
