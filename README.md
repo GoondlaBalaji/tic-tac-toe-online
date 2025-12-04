@@ -29,20 +29,19 @@
 
 # 🖼 Screenshots
 
-### 📌 Home Menu  
-<img src="images/menu.png" width="350">
+<!-- TOP ROW — 2 IMAGES -->
+<p align="center">
+  <img src="images/menu.png" width="45%" style="margin-right:10px;">
+  <img src="images/offline.png" width="45%">
+</p>
 
-### 🎮 Offline Gameplay  
-<img src="images/offline.png" width="350">
+<!-- BOTTOM ROW — 3 IMAGES -->
+<p align="center">
+  <img src="images/win.png" width="30%" style="margin-right:10px;">
+  <img src="images/online.png" width="30%" style="margin-right:10px;">
+  <img src="images/mobile.png" width="30%">
+</p>
 
-### ⚔ Win Animation + Bonus GIF  
-<img src="images/win.png" width="350">
-
-### 🌍 Online Gameplay (Room Match)  
-<img src="images/online.png" width="350">
-
-### 📱 Mobile UI  
-<img src="images/mobile.png" width="350">
 
 > Upload your actual screenshots inside `/screenshots/` folder.
 
