@@ -151,3 +151,87 @@ project/
 │
 └── scripts/
     └── main.js
+```
+
+## 🛠 Tech Stack
+
+- Frontend
+- HTML5
+- CSS3
+- JavaScript
+- Libraries
+- Firebase Realtime Database
+- Tone.js (Audio Engine)
+- Google Fonts
+- Custom GIF/MP4 animation handling
+
+## 📦 How to Run Locally
+1️⃣ Clone the repo
+```
+git clone https://github.com/YOUR_GITHUB_USERNAME/tic-tac-toe-kapow.git
+cd tic-tac-toe-kapow
+```
+
+2️⃣ Run without server
+
+Just double-click:
+```
+- index.html
+- offline.html
+- online.html
+```
+
+3️⃣ Firebase Online Mode
+
+- Works instantly — no local server required.
+
+## 🌐 Deploying to GitHub Pages
+
+1️⃣ Go to:
+- Settings → Pages
+
+2️⃣ Select:
+- Branch: main
+- Folder: /root
+
+3️⃣ Save  After 30–60 seconds →
+🔗 Your game goes live!
+
+## 🧠 Online Game Logic (Deep Dive)
+- Host Flow
+- Creates Firebase node
+- Waits for guest
+- Redirects when guestPresent becomes true
+- Random first-player assigned
+- Guest Flow
+- Enters room code
+- Firebase validates room
+- Redirects into match
+- Realtime Sync
+- Board (9 slots) stored in Firebase
+- Turn value stored and updated
+- result = "X" or "O" or "draw"
+- Both clients listen via onValue()
+
+## ⭐ Planned Future Updates
+
+- Global leaderboard
+- Character select mode
+- Special powers (charge punch, shield)
+- Animated UI skins
+- Online ranked mode
+
+## ✍ Authors
+
+👨‍🎓 Goondla Balaji (Balaji) — Developer
+
+## 📜 License
+
+Licensed under MIT License.
+
+## ❤️ Support
+
+If you like this project:
+- ⭐ Star the repo
+- 🗣 Share with friends
+- 🎮 Build your own version!
