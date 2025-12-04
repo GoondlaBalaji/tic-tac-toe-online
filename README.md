@@ -20,7 +20,7 @@
 
 ---
 
-# 🎥 Game Preview (GIF)
+# 🎥 Game Preview
 <p align="center">
   <video width="700" autoplay loop muted playsinline>
     <source src="screenshots/play2.mp4" type="video/mp4">
