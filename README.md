@@ -15,7 +15,7 @@
 
 ---
 
-# 🚀 Test Run Link (Preview Without Hosting)
+# 🚀 Test Run Link  
 👉 **https://Goondlabalaji.github.io/tic-tac-toe-online/mode.html**
 
 ---
@@ -29,56 +29,96 @@
 
 # 🖼 Screenshots
 
-<!-- TOP ROW — 2 IMAGES -->
+
+<!-- MAIN TWO-COLUMN SCREENSHOT LAYOUT -->
+<div style="display:flex; justify-content:center; gap:50px; margin-top:20px;">
+
+
+<table align="center">
+<tr>
+<td>
+
+<!-- LEFT COLUMN (3 Images) -->
+<table align="center">
+<tr>
+<td>
+
+<!-- LEFT COLUMN (3 Images with names) -->
 <p align="center">
-  <img src="images/menu.png" width="45%" style="margin-right:10px;">
-  <img src="images/offline.png" width="45%">
+  <img src="images/online.png" width="300" style="border:4px solid #000; border-radius:6px;"><br>
+  <b>Online Gameplay</b><br><br>
+
+  <img src="images/offline.png" width="300" style="border:4px solid #000; border-radius:6px;"><br align="center">
+  <b>Offline Gameplay</b><br><br>
+
+  <img src="images/win.png" width="300" style="border:4px solid #000; border-radius:6px;"><br>
+  <b>Win Animation</b><br><br>
 </p>
 
-<!-- BOTTOM ROW — 3 IMAGES -->
+</td>
+<td>
+
+<!-- RIGHT COLUMN (2 Images with names) -->
 <p align="center">
-  <img src="images/win.png" width="30%" style="margin-right:10px;">
-  <img src="images/online.png" width="30%" style="margin-right:10px;">
-  <img src="images/mobile.png" width="30%">
+
+  <img src="images/menu.png" width="300" style="border:4px solid #000; border-radius:6px;"><br>
+  <b>Home Menu</b><br><br>
+
+  <img src="images/mobileui.jpg" width="300" style="border:4px solid #000; border-radius:6px;"><br>
+  <b>Mobile UI</b><br><br>
+
 </p>
 
+</td>
+</tr>
+</table>
 
-> Upload your actual screenshots inside `/screenshots/` folder.
+
+
+</td>
+</tr>
+</table>
+
+
+</div>
+
+
 
 ---
 
 # ✨ Features
 
 ## 🧩 Offline Features
-- Comic-book style UI  
-- Animated moves and explosions  
-- Intelligent sound design  
-- Massive win/draw animations  
-- Bonus fight-scene GIF after match  
-- Fully mobile responsive  
-- No scrollbars, perfectly centered  
+- Comic book-style UI  
+- Explosive animations  
+- Particle effects  
+- Sound effects for every move  
+- Win animations  
+- Bonus fight-scene GIFs  
+- No scrollbars  
+- Full mobile support  
 
-## 🌐 Online Multiplayer Features  
-- Create Room  
-- Join with 5-letter code  
-- Real-time Firebase sync  
+## 🌐 Online Multiplayer Features
+- Create room / join room  
+- Auto room code generator  
 - Random first-player assignment  
-- Instant redirects  
-- Sync win lines & results  
-- Sync GIF bonus scenes  
+- Live sync using Firebase  
+- Win-line sync  
+- GIF bonus scene sync  
+- Real-time UI updates  
 
-## 🔊 Advanced Audio System (Tone.js)
-- X and O have unique sound effects  
-- Win fanfare (triad chord)  
-- Draw noise effect  
-- Floating animated captions (KA-CHINK!, WHUMP!, etc.)  
+## 🔊 Audio System (Tone.js)
+- X and O each have unique sound  
+- Win fanfare  
+- Draw noise  
+- Comic-style floating text  
 
-## 🎨 Comic UI Style  
-- Halftone dotted background  
-- Thick black borders  
-- Punchy shadows  
-- Pop-art typography  
-- Animated panels  
+## 🎨 Pop-Art Comic UI
+- Halftone background  
+- Thick black comic borders  
+- Skewed panels  
+- Animated buttons  
+- High-contrast shadows  
 
 ---
 
@@ -87,23 +127,27 @@
 ```bash
 project/
 │
-├── index.html          # Main menu
-├── offline.html        # Offline mode
-├── online.html         # Multiplayer
-├── ai.html             # AI mode (optional)
+├── mode.html        
+├── offline.html     
+├── online.html      
+├── ai.html          # optional
 │
-├── animation/          # GIF or MP4 fight scenes
+├── animation/       # GIF or MP4 scenes
 │   ├── ani1.mp4
 │   ├── ani2.mp4
 │   ├── ani3.mp4
 │   └── ...
 │
-├── screenshots/        # Screenshots for README
+├── images/          # Screenshots for README
 │   ├── menu.png
 │   ├── offline.png
-│   ├── online.png
 │   ├── win.png
+│   ├── online.png
+│   ├── mobileui.jpg
+│
+├── screenshots/
+│   ├── banner.png
 │   └── gameplay.gif
 │
-└── /scripts            # (optional)
+└── scripts/
     └── main.js
