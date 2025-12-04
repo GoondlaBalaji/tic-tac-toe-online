@@ -22,7 +22,10 @@
 
 # 🎥 Game Preview (GIF)
 <p align="center">
-  <img src="screenshots/gameplay.gif" width="300" alt="Gameplay GIF">
+  <video width="700" autoplay loop muted playsinline>
+    <source src="screenshots/play2.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
 </p>
 
 ---
