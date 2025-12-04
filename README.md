@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="screenshots/banner.png" width="100%" alt="KA-POW Banner">
+  <img src="screenshots/header.jpg" width="100%" alt="KA-POW Banner">
 </p>
 
 <h1 align="center">🎮 TIC-TAC-TOE: KA-POW! EDITION</h1>
