@@ -22,10 +22,7 @@
 
 # 🎥 Game Preview
 <p align="center">
-  <video width="700" autoplay loop muted playsinline>
-    <source src="https://raw.githubusercontent.com/Goondlabalaji/tic-tac-toe-online/main/screenshots/play2.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
+  <img src="screenshots/play.gif" width="700" alt="Gameplay GIF" loop>
 </p>
 
 
